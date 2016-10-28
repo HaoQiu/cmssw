@@ -21,6 +21,8 @@ def customise(process):
         process=customise_Reco(process,float(n))
     if hasattr(process,'digitisation_step'):
         process=customise_Digi(process)
+    if hasattr(process,'validation_step'):
+        process=customise_Validation(process,float(n))
     process=customise_condOverRides(process)
 
     return process
@@ -61,32 +63,6 @@ def customise_RawToDigi(process):
     return process
 
 def customise_Reco(process,pileup):
-    # insert the new clusterizer
-    process.load('SimTracker.SiPhase2Digitizer.phase2TrackerClusterizer_cfi')
-    
-    #process.load('RecoLocalTracker.SubCollectionProducers.jetCoreClusterSplitter_cfi')	
-    #clustersTmp = 'siPixelClustersPreSplitting'
-     # 0. Produce tmp clusters in the first place.
-    #process.siPixelClustersPreSplitting = process.siPixelClusters.clone()
-    #process.siPixelRecHitsPreSplitting = process.siPixelRecHits.clone()
-    #process.siPixelRecHitsPreSplitting.src = clustersTmp
-    #process.pixeltrackerlocalreco.replace(process.siPixelClusters, process.siPixelClustersPreSplitting)
-    #process.pixeltrackerlocalreco.replace(process.siPixelRecHits, process.siPixelRecHitsPreSplitting)
-    #process.clusterSummaryProducer.pixelClusters = clustersTmp
-    itIndex = process.pixeltrackerlocalreco.index(process.siPixelClustersPreSplitting)
-    process.pixeltrackerlocalreco.insert(itIndex, process.siPhase2Clusters)
-    process.pixeltrackerlocalreco.remove(process.siPixelClustersPreSplitting)
-    process.pixeltrackerlocalreco.remove(process.siPixelRecHitsPreSplitting)
-    process.trackerlocalreco.remove(process.clusterSummaryProducer)
-    # keep new clusters
-    alist=['RAWSIM','FEVTDEBUG','FEVTDEBUGHLT','GENRAW','RAWSIMHLT','FEVT']
-    for a in alist:
-        b=a+'output'
-        if hasattr(process,b):
-            getattr(process,b).outputCommands.append('keep *_siPhase2Clusters_*_*')
-
-
- 
     return process
 
 def customise_condOverRides(process):
@@ -94,4 +70,15 @@ def customise_condOverRides(process):
     return process
 
 
+def customise_Validation(process,pileup):
 
+    process.pixelDigisValid.src = cms.InputTag('simSiPixelDigis', "Pixel")
+    if hasattr(process,'simHitTPAssocProducer'):
+        process.simHitTPAssocProducer.simHitSrc=cms.VInputTag(cms.InputTag("g4SimHits","TrackerHitsPixelBarrelLowTof"),
+                                                              cms.InputTag("g4SimHits","TrackerHitsPixelEndcapLowTof"))
+
+    if hasattr(process,'trackingParticleNumberOfLayersProducer'):
+        process.trackingParticleNumberOfLayersProducer.simHits=cms.VInputTag(cms.InputTag("g4SimHits","TrackerHitsPixelBarrelLowTof"),
+                                                               cms.InputTag("g4SimHits","TrackerHitsPixelEndcapLowTof"))
+
+    return process

@@ -102,7 +102,7 @@ namespace edm {
     }
   }
 
-  InputSource::~InputSource() {}
+  InputSource::~InputSource() noexcept(false) {}
 
   void
   InputSource::fillDescriptions(ConfigurationDescriptions& descriptions) {
@@ -245,14 +245,14 @@ namespace edm {
     endJob();
   }
 
-  SharedResourcesAcquirer*
+  std::pair<SharedResourcesAcquirer*,std::recursive_mutex*>
   InputSource::resourceSharedWithDelayedReader() {
     return resourceSharedWithDelayedReader_();
   }
 
-  SharedResourcesAcquirer*
+  std::pair<SharedResourcesAcquirer*,std::recursive_mutex*>
   InputSource::resourceSharedWithDelayedReader_() {
-    return nullptr;
+    return std::pair<SharedResourcesAcquirer*,std::recursive_mutex*>(nullptr,nullptr);
   }
 
   void

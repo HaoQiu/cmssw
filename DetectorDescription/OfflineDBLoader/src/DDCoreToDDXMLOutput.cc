@@ -1,15 +1,26 @@
-#include <DetectorDescription/OfflineDBLoader/interface/DDCoreToDDXMLOutput.h>
-
-#include <DetectorDescription/Core/interface/DDSolid.h>
 #include <DetectorDescription/Core/interface/DDMaterial.h>
-
-#include <DetectorDescription/Core/interface/DDSpecifics.h>
 #include <DetectorDescription/Core/interface/DDPartSelection.h>
+#include <DetectorDescription/Core/interface/DDSolid.h>
 #include <DetectorDescription/Core/interface/DDSolidShapes.h>
+#include <DetectorDescription/Core/interface/DDSpecifics.h>
+#include <DetectorDescription/OfflineDBLoader/interface/DDCoreToDDXMLOutput.h>
+#include <stddef.h>
+#include <iomanip>
+#include <vector>
 
 #include "CLHEP/Units/GlobalSystemOfUnits.h"
-
-#include <sstream>
+#include "CLHEP/Units/SystemOfUnits.h"
+#include "DetectorDescription/Base/interface/DDRotationMatrix.h"
+#include "DetectorDescription/Base/interface/DDTranslation.h"
+#include "DetectorDescription/Core/interface/DDName.h"
+#include "DetectorDescription/Core/interface/DDPosData.h"
+#include "DetectorDescription/Core/interface/DDTransform.h"
+#include "DetectorDescription/Core/interface/DDValue.h"
+#include "DetectorDescription/Core/interface/DDValuePair.h"
+#include "FWCore/Utilities/interface/Exception.h"
+#include "Math/GenVector/Cartesian3D.h"
+#include "Math/GenVector/DisplacementVector3D.h"
+#include "Math/GenVector/Rotation3D.h"
 
 void 
 DDCoreToDDXMLOutput::solid( const DDSolid& solid, std::ostream& xos ) 
@@ -266,6 +277,30 @@ DDCoreToDDXMLOutput::solid( const DDSolid& solid, std::ostream& xos )
          << " startPhi=\"" << rs.startPhi()/deg << "*deg\""
          << " deltaPhi=\"" << rs.deltaPhi()/deg << "*deg\"/>"
          << std::endl;
+         break;
+      }
+      case ddcuttubs: 
+      {
+         //      <Tubs name="TrackerSupportTubeNomex"         rMin="[SupportTubeR1]+[Tol]" 
+         //            rMax="[SupportTubeR2]-[Tol]"           dz="[SupportTubeL]" 
+         //            startPhi="0*deg"                       deltaPhi="360*deg"/>
+         DDCutTubs rs(solid);
+	 const std::array<double, 3> &pLowNorm(rs.lowNorm());
+	 const std::array<double, 3> &pHighNorm(rs.highNorm());
+
+         xos << "<CutTubs name=\""  << rs.toString() << "\""
+	     << " dz=\"" << rs.zhalf() << "*mm\""
+	     << " rMin=\"" << rs.rIn() << "*mm\""
+	     << " rMax=\"" << rs.rOut() << "*mm\""
+	     << " startPhi=\"" << rs.startPhi()/deg << "*deg\""
+	     << " deltaPhi=\"" << rs.deltaPhi()/deg << "*deg\""
+	     << " lx=\"" << pLowNorm[0] << "\""
+	     << " ly=\"" << pLowNorm[1] << "\""
+	     << " lz=\"" << pLowNorm[2] << "\""
+	     << " tx=\"" << pHighNorm[0] << "\""
+	     << " ty=\"" << pHighNorm[1] << "\""
+	     << " tz=\"" << pHighNorm[2] << "\"/>"
+	     << std::endl;
          break;
       }
          //       return new PSolid( pstrs(solid.toString()), solid.parameters()

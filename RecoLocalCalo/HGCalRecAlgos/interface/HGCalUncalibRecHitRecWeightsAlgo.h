@@ -26,6 +26,7 @@ template<class C> class HGCalUncalibRecHitRecWeightsAlgo
   virtual ~HGCalUncalibRecHitRecWeightsAlgo<C>() { };
 
   void set_isSiFESim(const bool isSiFE) { isSiFESim_ = isSiFE; }
+  bool isSiFESim() const { return isSiFESim_; }
 
   void set_ADCLSB(const double adclsb) { adcLSB_ = adclsb; }
   void set_TDCLSB(const double tdclsb) { tdcLSB_ = tdclsb; }
@@ -82,7 +83,7 @@ template<class C> class HGCalUncalibRecHitRecWeightsAlgo
     } else {
       amplitude_ = double(sample.data()) * adcLSB_;
       LogDebug("HGCUncalibratedRecHit") << "ADC+: set the charge to: " << amplitude_ << ' ' << sample.data() 
-                                        << ' ' << adcLSB_ << ' ' << std::endl;
+						 << ' ' << adcLSB_ << ' ' << std::endl;
     }
     
     int thickness = 1;
@@ -93,6 +94,7 @@ template<class C> class HGCalUncalibRecHitRecWeightsAlgo
     amplitude_ = amplitude_/fCPerMIP_[thickness-1];
 
     LogDebug("HGCUncalibratedRecHit") << "Final uncalibrated amplitude : " << amplitude_ << std::endl;
+    
     return HGCUncalibratedRecHit( dataFrame.id(), amplitude_, pedestal_, jitter_, chi2_, flag);
    }
   

@@ -1,6 +1,13 @@
 #include "DetectorDescription/Core/interface/DDSpecifics.h"
+
+#include <ostream>
+
+#include "DetectorDescription/Base/interface/Store.h"
+#include "DetectorDescription/Core/interface/DDExpandedView.h"
+#include "DetectorDescription/Core/interface/DDLogicalPart.h"
 #include "DetectorDescription/Core/src/Specific.h"
-#include "DetectorDescription/Base/interface/DDdebug.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "FWCore/Utilities/interface/Exception.h"
 
 using DDI::Specific;
 
@@ -24,7 +31,6 @@ DDSpecifics::DDSpecifics(const DDName & name,
   for( auto& it : v ) {
     if( it.first.isDefined().second ) {
       it.first.addSpecifics( it.second );
-      DCOUT('C', "add specifics to LP: partsel=" << *( it.second.first ));
     }
     else {
       throw cms::Exception("DDException") << "Definition of LogicalPart missing! name="

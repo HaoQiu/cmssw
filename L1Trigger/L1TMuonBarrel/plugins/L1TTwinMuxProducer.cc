@@ -30,7 +30,7 @@ public:
   ~L1TTwinMuxProducer() {}
   void produce(edm::Event & e, const edm::EventSetup& c);
 private:
-  L1TTwinMuxAlgortithm * m_l1tma;
+  std::unique_ptr<L1TTwinMuxAlgortithm>  m_l1tma;
   edm::EDGetToken m_dtdigi, m_dtthetadigi, m_rpcsource;
 
 };
@@ -38,8 +38,7 @@ private:
 
 
 
-L1TTwinMuxProducer::L1TTwinMuxProducer(const edm::ParameterSet & pset) {
-m_l1tma = new L1TTwinMuxAlgortithm();
+L1TTwinMuxProducer::L1TTwinMuxProducer(const edm::ParameterSet & pset):m_l1tma(new L1TTwinMuxAlgortithm()) {
 
 m_dtdigi      = consumes<L1MuDTChambPhContainer>(pset.getParameter<edm::InputTag>("DTDigi_Source"));
 m_dtthetadigi = consumes<L1MuDTChambThContainer>(pset.getParameter<edm::InputTag>("DTThetaDigi_Source"));
@@ -67,9 +66,9 @@ void L1TTwinMuxProducer::produce(edm::Event& e, const edm::EventSetup& c) {
   e.getByToken(m_rpcsource, rpcDigis);
 
 
-  std::auto_ptr<L1MuDTChambPhContainer> l1ttmp = m_l1tma->produce(phiDigis, thetaDigis, rpcDigis,c);
+  std::unique_ptr<L1MuDTChambPhContainer> l1ttmp = m_l1tma->produce(phiDigis, thetaDigis, rpcDigis,c);
   //cout << "DEBUG:  L1T Twin Mux Producer, output size:  " << l1ttmp->getContainer()->size() << "\n";
-  e.put(l1ttmp);
+  e.put(std::move(l1ttmp));
 }
 
 

@@ -1,5 +1,4 @@
 import FWCore.ParameterSet.Config as cms
-from Configuration.StandardSequences.Eras import eras
 
 from DQMServices.Components.DQMMessageLogger_cfi import *
 from DQMServices.Components.DQMDcsInfo_cfi import *
@@ -19,11 +18,12 @@ from DQM.CastorMonitor.castor_dqm_sourceclient_offline_cff import *
 from Validation.RecoTau.DQMSequences_cfi import *
 from DQMOffline.Hcal.HcalDQMOfflineSequence_cff import *
 from DQMOffline.L1Trigger.L1TriggerDqmOffline_cff import *
+from DQM.CTPPS.totemDQM_cff import *
 
 DQMOfflinePreDPG = cms.Sequence( dqmDcsInfo *
                                  l1TriggerDqmOffline * # L1 emulator is run within this sequence for real data
                                  ecal_dqm_source_offline *
-								 hcalOfflineSourceSequence *
+                                 hcalOfflineSourceSequence *
                                  SiStripDQMTier0 *
                                  siPixelOfflineDQM_source *
                                  dtSources *
@@ -32,9 +32,6 @@ DQMOfflinePreDPG = cms.Sequence( dqmDcsInfo *
                                  es_dqm_source_offline *
                                  castorSources *
                                  HcalDQMOfflineSequence )
-eras.phase1Pixel.toReplaceWith(DQMOfflinePreDPG, DQMOfflinePreDPG.copyAndExclude([ # FIXME
-    siPixelOfflineDQM_source, # Pixel DQM needs to be updated for phase1
-]))
 
 DQMOfflineDPG = cms.Sequence( DQMOfflinePreDPG *
                               DQMMessageLogger )
@@ -64,8 +61,8 @@ DQMOfflinePrePOG = cms.Sequence( TrackingDQMSourceTier0 *
                                  dqmPhysics *
                                  produceDenoms *
                                  pfTauRunDQMValidation)
-eras.phase1Pixel.toReplaceWith(DQMOfflinePrePOG, DQMOfflinePrePOG.copyAndExclude([ # FIXME
-    TrackingDQMSourceTier0,  # Tracking DQM needs to be migrated for phase1
+from Configuration.Eras.Modifier_phase1Pixel_cff import phase1Pixel
+phase1Pixel.toReplaceWith(DQMOfflinePrePOG, DQMOfflinePrePOG.copyAndExclude([ # FIXME
     triggerOfflineDQMSource, # No HLT yet for 2017, so no need to run the DQM (avoiding excessive printouts)
     pfTauRunDQMValidation,   # Excessive printouts because 2017 doesn't have HLT yet
 ]))
@@ -74,15 +71,24 @@ DQMOfflinePOG = cms.Sequence( DQMOfflinePrePOG *
                               DQMMessageLogger )
 
 HLTMonitoring = cms.Sequence( OfflineHLTMonitoring )
-
+HLTMonitoringPA = cms.Sequence( OfflineHLTMonitoringPA )
 DQMOffline = cms.Sequence( DQMOfflinePreDPG *
                            DQMOfflinePrePOG *
                            HLTMonitoring *
                            dqmFastTimerServiceLuminosity *
                            DQMMessageLogger )
-eras.phase1Pixel.toReplaceWith(DQMOffline, DQMOffline.copyAndExclude([
+phase1Pixel.toReplaceWith(DQMOffline, DQMOffline.copyAndExclude([
     HLTMonitoring # No HLT yet for 2017, so no need to run the DQM (avoiding excessive printouts)
 ]))
+
+_ctpps_2016_DQMOffline = DQMOffline.copy()
+_ctpps_2016_DQMOffline *= totemDQM
+from Configuration.Eras.Modifier_ctpps_2016_cff import ctpps_2016
+ctpps_2016.toReplaceWith(DQMOffline, _ctpps_2016_DQMOffline)
+
+_ctpps_2016_DQMOffline = DQMOffline.copy()
+#_ctpps_2016_DQMOffline *= totemDQM
+ctpps_2016.toReplaceWith(DQMOffline, _ctpps_2016_DQMOffline)
 
 DQMOfflineFakeHLT = cms.Sequence( DQMOffline )
 DQMOfflineFakeHLT.remove( HLTMonitoring )
@@ -128,9 +134,6 @@ DQMOfflineCommonSiStripZeroBias = cms.Sequence( dqmDcsInfo *
 DQMOfflineTracking = cms.Sequence( TrackingDQMSourceTier0Common *
                                    pvMonitor
                                  )
-eras.phase1Pixel.toReplaceWith(DQMOfflineTracking, DQMOfflineTracking.copyAndExclude([ # FIXME
-    TrackingDQMSourceTier0Common # Tracking DQM needs to be migrated for phase1
-]))
 DQMOfflineMuon = cms.Sequence( dtSources *
                                rpcTier0Source *
                                cscSources *
@@ -153,4 +156,9 @@ DQMOfflineMiniAOD = cms.Sequence(jetMETDQMOfflineRedoProductsMiniAOD)
 #miniAOD DQM sequences need to access the filter results.
 PostDQMOfflineMiniAOD = cms.Sequence(miniAODDQMSequence*jetMETDQMOfflineSourceMiniAOD*tracksDQMMiniAOD*topPhysicsminiAOD)
 PostDQMOffline = cms.Sequence()
+
+from Configuration.Eras.Modifier_phase2_hcal_cff import phase2_hcal
+phase2_hcal.toReplaceWith( PostDQMOfflineMiniAOD, PostDQMOfflineMiniAOD.copyAndExclude([
+    pfMetDQMAnalyzerMiniAOD, pfPuppiMetDQMAnalyzerMiniAOD # No hcalnoise yet
+]))
 

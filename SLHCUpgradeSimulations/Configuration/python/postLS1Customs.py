@@ -1,7 +1,5 @@
 import FWCore.ParameterSet.Config as cms
 
-from RecoTracker.Configuration.customiseForRunI import customiseForRunI
-
 def customisePostLS1_Common(process):
 
     # deal with L1 Emulation separately
@@ -152,23 +150,6 @@ def customisePostLS1_HI(process,displayDeprecationWarning=True):
 
     return process
 
-def customisePostLS1_B0T(process):
-    # 50ns only
-
-    process=customisePostLS1_50ns(process)
-    process=customiseForRunI(process)
-
-    return process
-
-def customisePostLS1_B0T_lowPU(process):
-    # 50ns only
-
-    process=customisePostLS1_lowPU(process)
-    process=customiseForRunI(process)
-
-    return process
-
-
 def digiEventContent(process):
     #extend the event content
 
@@ -250,7 +231,7 @@ def customise_Validation(process):
 
 def customise_Sim(process):
     # enable 2015 HF shower library
-    process.g4SimHits.HFShowerLibrary.FileName = 'SimG4CMS/Calo/data/HFShowerLibrary_npmt_noatt_eta4_16en_v3.root'
+    process.g4SimHits.HFShowerLibrary.FileName = 'SimG4CMS/Calo/data/HFShowerLibrary_npmt_noatt_eta4_16en_v4.root'
     return process
 
 def customise_Digi_Common(process):

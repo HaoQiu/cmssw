@@ -37,8 +37,13 @@ l1t::GlobalObject l1TGtObjectStringToEnum(const std::string& label) {
             {"ETT", gtETT},
             {"HTT", gtHTT},
             {"HTM", gtHTM},
-	    {"ETM2", gtETM2},
-	    {"MinBias", gtMinBias},
+	    {"ETMHF", gtETMHF},
+	    {"TowerCount",gtTowerCount},
+	    {"MinBiasHFP0", gtMinBiasHFP0},
+	    {"MinBiasHFM0", gtMinBiasHFM0},
+	    {"MinBiasHFP1", gtMinBiasHFP1},
+	    {"MinBiasHFM1", gtMinBiasHFM1},
+	    {"ETTem", gtETTem},
             {"External", gtExternal},
             {"ObjNull", ObjNull},
             {0, (GlobalObject) - 1}
@@ -116,13 +121,38 @@ std::string l1t::l1TGtObjectEnumToString(const GlobalObject& gtObject) {
         }
             break;
 
-        case gtETM2: {
-            gtObjectString = "ETM2";
+        case gtETMHF: {
+            gtObjectString = "ETMHF";
         }
             break;
 
-        case gtMinBias: {
-            gtObjectString = "MinBias";
+        case gtTowerCount: {
+            gtObjectString = "TowerCount";
+        }
+            break;
+
+        case gtMinBiasHFP0: {
+            gtObjectString = "MinBiasHFP0";
+        }
+            break;
+
+        case gtMinBiasHFM0: {
+            gtObjectString = "MinBiasHFM0";
+        }
+            break;
+
+        case gtMinBiasHFP1: {
+            gtObjectString = "MinBiasHFP1";
+        }
+            break;
+
+        case gtMinBiasHFM1: {
+            gtObjectString = "MinBiasHFM1";
+        }
+            break;
+
+        case gtETTem: {
+            gtObjectString = "ETTem";
         }
             break;
 

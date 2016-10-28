@@ -173,18 +173,12 @@ namespace edm {
     }
 
     using Base::getProvenance;
-    
-    signalslot::Signal<void(StreamContext const&, ModuleCallingContext const&)> preModuleDelayedGetSignal_;
-    signalslot::Signal<void(StreamContext const&, ModuleCallingContext const&)> postModuleDelayedGetSignal_;
 
-    
   private:
 
     BranchID pidToBid(ProductID const& pid) const;
 
     edm::ThinnedAssociation const* getThinnedAssociation(edm::BranchID const& branchID) const;
-
-    virtual void readFromSource_(ProductResolverBase const& phb, ModuleCallingContext const* mcc) const override;
 
     virtual unsigned int transitionIndex_() const override;
     

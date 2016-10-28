@@ -58,6 +58,13 @@ namespace ecaldqm
   }
 
   void
+  TrigPrimTask::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+  {
+    // Reset by LS plots at beginning of every LS
+    MEs_.at("EtSummaryByLumi").reset();
+  }
+
+  void
   TrigPrimTask::beginEvent(edm::Event const& _evt, edm::EventSetup const&  _es)
   {
     using namespace std;
@@ -177,10 +184,12 @@ namespace ecaldqm
     MESet& meEtReal(MEs_.at("EtReal"));
     MESet& meEtRealMap(MEs_.at("EtRealMap"));
     MESet& meEtSummary(MEs_.at("EtSummary"));
+    MESet& meEtSummaryByLumi(MEs_.at("EtSummaryByLumi"));
     MESet& meLowIntMap(MEs_.at("LowIntMap"));
     MESet& meMedIntMap(MEs_.at("MedIntMap"));
     MESet& meHighIntMap(MEs_.at("HighIntMap"));
     MESet& meTTFlags(MEs_.at("TTFlags"));
+    MESet& meTTFlagsVsEt(MEs_.at("TTFlagsVsEt"));
     MESet& meTTFlags4( MEs_.at("TTFlags4") );
     MESet& meTTFMismatch(MEs_.at("TTFMismatch"));
     MESet& meOccVsBx(MEs_.at("OccVsBx"));
@@ -206,6 +215,7 @@ namespace ecaldqm
       meEtReal.fill(ttid, et);
       meEtRealMap.fill(ttid, et);
       meEtSummary.fill(ttid, et);
+      meEtSummaryByLumi.fill(ttid, et);
 
       int interest(tpItr->ttFlag() & 0x3);
 
@@ -226,6 +236,7 @@ namespace ecaldqm
       // Fill TT Flag MEs
       float ttF( tpItr->ttFlag() );
       meTTFlags.fill( ttid, ttF );
+      meTTFlagsVsEt.fill(ttid, et, ttF);
       // Monitor occupancy of TTF=4
       // which contains info about TT auto-masking
       if ( ttF == 4. )
@@ -275,6 +286,7 @@ namespace ecaldqm
     MESet& meMatchedIndex(MEs_.at("MatchedIndex"));
     MESet& meEtEmulError(MEs_.at("EtEmulError"));
     MESet& meFGEmulError(MEs_.at("FGEmulError"));
+    MESet& meRealvEmulEt(MEs_.at("RealvEmulEt"));
 
     for(EcalTrigPrimDigiCollection::const_iterator tpItr(_tps.begin()); tpItr != _tps.end(); ++tpItr){
       EcalTrigTowerDetId ttid(tpItr->id());
@@ -337,6 +349,9 @@ namespace ecaldqm
             } // iDigi
             if(!matchedIndex.size()) matchedIndex.push_back(0); // no Et match found => no emul
                         
+            // Fill Real vs Emulated TP Et
+            meRealvEmulEt.fill( ttid,realEt,(*tpItr)[2].compressedEt() ); // iDigi=2:in-time BX
+
             // Fill matchedIndex ME
             for(std::vector<int>::iterator matchItr(matchedIndex.begin()); matchItr != matchedIndex.end(); ++matchItr){
               meMatchedIndex.fill(ttid, *matchItr + 0.5);

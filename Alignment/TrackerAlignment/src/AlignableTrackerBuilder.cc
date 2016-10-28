@@ -6,7 +6,7 @@
 // geometry
 #include "Geometry/CommonDetUnit/interface/GeomDet.h"
 #include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
-#include "Geometry/TrackerGeometryBuilder/interface/GluedGeomDet.h"
+#include "Geometry/CommonDetUnit/interface/GluedGeomDet.h"
 
 // alignment
 #include "Alignment/CommonAlignment/interface/AlignableObjectId.h"
@@ -239,10 +239,10 @@ void AlignableTrackerBuilder
   AlignableCompositeBuilder compositeBuilder(trackerTopology, trackerIndexer);
   auto trackerLevels = trackerAlignmentLevelBuilder.build();
 
-  for (auto* trackerSubLevels : trackerLevels) {
+  for (auto& trackerSubLevels: trackerLevels) {
     // first add all levels of the current subdetector to the builder
-    for (auto* level : *trackerSubLevels) {
-      compositeBuilder.addAlignmentLevel(level);
+    for (auto& level: trackerSubLevels) {
+      compositeBuilder.addAlignmentLevel(std::move(level));
     }
     // now build this tracker-level
     numCompositeAlignables += compositeBuilder.buildAll(*alignableMap);

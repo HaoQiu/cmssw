@@ -38,13 +38,12 @@ using namespace L1TMuon;
 using namespace edm;
 using namespace std;
 
-inline TriggerPrimitiveCollection* L1TMuonTPPproducer(
+inline void L1TMuonTPPproducer(
                                 edm::Handle<L1MuDTChambPhContainer> phiDigis,
                                 edm::Handle<L1MuDTChambThContainer> thetaDigis,
                                 edm::Handle<RPCDigiCollection> rpcDigis,
+                                TriggerPrimitiveCollection *master_out,
                                 const edm::EventSetup& es) {
-
-  TriggerPrimitiveCollection *master_out = new TriggerPrimitiveCollection();
 
   std::unique_ptr<GeometryTranslator> geom;
   geom.reset(new GeometryTranslator());
@@ -53,8 +52,8 @@ inline TriggerPrimitiveCollection* L1TMuonTPPproducer(
 
 
     double eta,phi,bend;
-    std::auto_ptr<TriggerPrimitiveCollection> subs_out(new TriggerPrimitiveCollection);
-    std::auto_ptr<DTCollector> dtcolltr(new DTCollector);
+    std::unique_ptr<TriggerPrimitiveCollection> subs_out(new TriggerPrimitiveCollection);
+    std::unique_ptr<DTCollector> dtcolltr(new DTCollector);
     dtcolltr->extractPrimitives(phiDigis, thetaDigis, *subs_out);
     auto the_tp = subs_out->begin();
     auto tp_end   = subs_out->end();
@@ -66,7 +65,7 @@ inline TriggerPrimitiveCollection* L1TMuonTPPproducer(
       the_tp->setCMSGlobalPhi(phi);
       the_tp->setThetaBend(bend);
     }
-    std::auto_ptr<RPCCollector> rpccolltr(new RPCCollector);
+    std::unique_ptr<RPCCollector> rpccolltr(new RPCCollector);
     rpccolltr->extractPrimitives(rpcDigis,*subs_out);
     the_tp = subs_out->begin();
     tp_end   = subs_out->end();
@@ -83,6 +82,6 @@ inline TriggerPrimitiveCollection* L1TMuonTPPproducer(
 		       subs_out->begin(),
 		       subs_out->end());
 
-  return master_out;
+  return;
 }
 

@@ -1,7 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
 # This object modifies hcalSimParameters for different scenarios
-from Configuration.StandardSequences.Eras import eras
 
 hcalSimParameters = cms.PSet(
     #  In HF, the SimHits energy is actually
@@ -63,8 +62,7 @@ hcalSimParameters = cms.PSet(
             143.52),            
         syncPhase = cms.bool(True),
         timePhase = cms.double(6.0),
-        timeSmearing = cms.bool(True),
-        siPMCells = cms.vint32()
+        timeSmearing = cms.bool(True)
     ),
     he = cms.PSet(
         readoutFrameSize = cms.int32(10),
@@ -96,23 +94,73 @@ hcalSimParameters = cms.PSet(
 hcalSimParameters.hoZecotek = hcalSimParameters.ho.clone()
 hcalSimParameters.hoZecotek.pixels = cms.int32(36000)
 hcalSimParameters.hoZecotek.photoelectronsToAnalog = [3.0]*16
+hcalSimParameters.hoZecotek.sipmDarkCurrentuA = cms.double(0.055)
+hcalSimParameters.hoZecotek.sipmCrossTalk = cms.double(0.32)
 
 hcalSimParameters.hoHamamatsu = hcalSimParameters.ho.clone()
 hcalSimParameters.hoHamamatsu.pixels = cms.int32(960)
 hcalSimParameters.hoHamamatsu.photoelectronsToAnalog = [3.0]*16
+hcalSimParameters.hoHamamatsu.sipmDarkCurrentuA = cms.double(0.055)
+hcalSimParameters.hoHamamatsu.sipmCrossTalk = cms.double(0.32)
 
-#
-# Need to change the HO parameters for post LS1 running
-#
-def _modifyHcalSimParametersForPostLS1( object ) :
-    """
-    Customises the HCal digitiser for post LS1 running
-    """
-    object.ho.photoelectronsToAnalog = cms.vdouble([4.0]*16)
-    object.ho.siPMCode = cms.int32(1)
-    object.ho.pixels = cms.int32(2500)
-    object.ho.doSiPMSmearing = cms.bool(False)
-    object.hf1.samplingFactor = cms.double(0.67)
-    object.hf2.samplingFactor = cms.double(0.67)
+# Customises the HCal digitiser for post LS1 running
+from Configuration.Eras.Modifier_run2_common_cff import run2_common
+run2_common.toModify( hcalSimParameters, 
+    ho = dict(
+        photoelectronsToAnalog = cms.vdouble([4.0]*16),
+        siPMCode = cms.int32(1),
+        pixels = cms.int32(2500),
+        doSiPMSmearing = cms.bool(False)
+    ),
+    hf1 = dict( samplingFactor = cms.double(0.67) ),
+    hf2 = dict( samplingFactor = cms.double(0.67) )
+)
 
-eras.run2_common.toModify( hcalSimParameters, func=_modifyHcalSimParametersForPostLS1 )
+from Configuration.Eras.Modifier_run2_HE_2017_cff import run2_HE_2017
+run2_HE_2017.toModify( hcalSimParameters,
+    he = dict(
+        photoelectronsToAnalog = cms.vdouble([57.5]*14),
+        pixels = cms.int32(27370), 
+        sipmDarkCurrentuA = cms.double(0.055),
+        sipmCrossTalk = cms.double(0.32),
+        doSiPMSmearing = cms.bool(True),
+    )
+)
+
+_newFactors = cms.vdouble(
+    210.55, 197.93, 186.12, 189.64, 189.63,
+    189.96, 190.03, 190.11, 190.18, 190.25,
+    190.32, 190.40, 190.47, 190.54, 190.61,
+    190.69, 190.83, 190.94, 190.94, 190.94,
+    190.94, 190.94, 190.94, 190.94, 190.94,
+    190.94, 190.94, 190.94, 190.94, 190.94,
+    190.94, 190.94, 190.94, 190.94, 190.94,
+    190.94, 190.94, 190.94, 190.94, 190.94,
+    190.94, 190.94, 190.94, 190.94, 190.94,
+    190.94, 190.94, 190.94, 190.94, 190.94,
+    190.94, 190.94, 190.94, 190.94, 190.94,
+    190.94, 190.94, 190.94, 190.94, 190.94,
+    190.94, 190.94, 190.94, 190.94, 190.94,
+    190.94, 190.94, 190.94, 190.94, 190.94,
+    190.94, 190.94, 190.94, 190.94, 190.94,
+    190.94, 190.94, 190.94, 190.94, 190.94,
+    190.94, 190.94, 190.94, 190.94, 190.94 )
+
+from Configuration.Eras.Modifier_phase2_hcal_cff import phase2_hcal
+phase2_hcal.toModify( hcalSimParameters,
+    hb = dict(
+        photoelectronsToAnalog = cms.vdouble([57.5]*16),
+        pixels = cms.int32(27370),
+        sipmDarkCurrentuA = cms.double(0.055),
+        sipmCrossTalk = cms.double(0.32),
+        doSiPMSmearing = cms.bool(True),
+    ),
+    he = dict(
+        samplingFactors = _newFactors,
+        photoelectronsToAnalog = cms.vdouble([57.5]*len(_newFactors)),
+        pixels = cms.int32(27370),
+        sipmDarkCurrentuA = cms.double(0.055),
+        sipmCrossTalk = cms.double(0.32),
+        doSiPMSmearing = cms.bool(True),
+    )
+)

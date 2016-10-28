@@ -47,7 +47,8 @@ TrackerCollisionTrackMon.doGoodTrackLayersVsPhiVsEtaPerTrack = cms.bool(True)
 TrackerCollisionTrackMon.doPUmonitoring                      = cms.bool(False)
 TrackerCollisionTrackMon.doPlotsVsBXlumi                     = cms.bool(False)
 TrackerCollisionTrackMon.doPlotsVsGoodPVtx                   = cms.bool(True)
-TrackerCollisionTrackMon.doEffFromHitPattern                 = cms.bool(True)
+TrackerCollisionTrackMon.doEffFromHitPatternVsPU             = cms.bool(True)
+TrackerCollisionTrackMon.doEffFromHitPatternVsBX             = cms.bool(True)
 
 # LS analysis
 TrackerCollisionTrackMon.doLumiAnalysis       = cms.bool(True)     
@@ -63,8 +64,8 @@ TrackerCollisionTrackMon.TkSizeMax             = cms.double(999.5)
 TrackerCollisionTrackMon.TkSizeMin             = cms.double(-0.5)
 
 # chi2 dof
-TrackerCollisionTrackMon.Chi2NDFBin            = cms.int32(50)
-TrackerCollisionTrackMon.Chi2NDFMax            = cms.double(49.5)
+TrackerCollisionTrackMon.Chi2NDFBin            = cms.int32(80)
+TrackerCollisionTrackMon.Chi2NDFMax            = cms.double(79.5)
 TrackerCollisionTrackMon.Chi2NDFMin            = cms.double(-0.5)
 
 # Number of seeds per Event

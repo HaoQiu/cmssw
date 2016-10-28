@@ -43,7 +43,7 @@ struct GzInputStream
    { gzclose(gzf) ; }
   explicit operator bool() const
   {
-    return ((eof == true) ? false : iss.fail());
+    return ((eof == true) ? false : !iss.fail());
   }
  } ;
 
@@ -709,9 +709,10 @@ void EcalTrigPrimESProducer::parseTextFile()
 	}
       }
       
-      if(flagPrint_)
+      if(flagPrint_) {
         std::cout<<std::endl ;
         std::cout<<std::endl ;
+      }
 	
       mapLut_[id] = param ;
     }

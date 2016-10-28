@@ -25,27 +25,29 @@ useMap		= False
 #	Central DQM Stuff imports
 #-------------------------------------
 from DQM.Integration.config.online_customizations_cfi import *
-process.load('DQM.Integration.config.FrontierCondition_GT_cfi')
 if useOfflineGT:
-	# DB condition for offline test: change and possibly customise the GT
-	from Configuration.AlCa.GlobalTag import GlobalTag as gtCustomise
-	process.GlobalTag = gtCustomise(process.GlobalTag, 'auto:run2_hlt', '')
+	process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
+	process.GlobalTag.globaltag = '74X_dataRun2_HLT_v1'
+else:
+	process.load('DQM.Integration.config.FrontierCondition_GT_cfi')
 if useFileInput:
 	process.load("DQM.Integration.config.fileinputsource_cfi")
 else:
 	process.load('DQM.Integration.config.inputsource_cfi')
-process.load('DQMServices.Components.DQMEnvironment_cfi')
 process.load('DQM.Integration.config.environment_cfi')
 
 #-------------------------------------
 #	Central DQM Customization
 #-------------------------------------
 process.source.streamLabel = cms.untracked.string("streamDQMCalibration")
+process.source.SelectEvents = cms.untracked.vstring("*HcalCalibration*")
 process.dqmEnv.subSystemFolder = subsystem
 process.dqmSaver.tag = subsystem
 referenceFileName = '/dqmdata/dqm/reference/hcal_reference.root'
 process.DQMStore.referenceFileName = referenceFileName
 process = customise(process)
+process.source.minEventsPerLumi=100
+
 
 #-------------------------------------
 #	CMSSW/Hcal non-DQM Related Module import
@@ -75,7 +77,7 @@ isCosmicRun		= runTypeName=="cosmic_run" or runTypeName=="cosmic_run_stage1"
 isHeavyIon		= runTypeName=="hi_run"
 cmssw			= os.getenv("CMSSW_VERSION").split("_")
 rawTag			= cms.InputTag("hltHcalCalibrationRaw")
-rawTagUntracked	= cms.InputTag("hltHcalCalibrationRaw")
+rawTagUntracked	= cms.untracked.InputTag("hltHcalCalibrationRaw")
 process.essourceSev = cms.ESSource(
 		"EmptyESSource",
 		recordName		= cms.string("HcalSeverityLevelComputerRcd"),
@@ -97,10 +99,13 @@ process.hbhereco = process.hbheprereco.clone()
 #-------------------------------------
 #	Hcal DQM Tasks and Clients import
 #-------------------------------------
-process.load("DQM.HcalTasks.LEDTask")
-process.load("DQM.HcalTasks.LaserTask")
 process.load("DQM.HcalTasks.PedestalTask")
-process.load('DQM.HcalTasks.RadDamTask')
+process.load('DQM.HcalTasks.RawTask')
+process.load("DQM.HcalTasks.LaserTask")
+process.load("DQM.HcalTasks.UMNioTask")
+process.load('DQM.HcalTasks.HcalOnlineHarvesting')
+process.load("DQM.HcalTasks.HFRaddamTask")
+process.load('DQM.HcalTasks.QIE11Task')
 
 #-------------------------------------
 #	To force using uTCA
@@ -113,23 +118,72 @@ if useMap:
                                    )
 
 #-------------------------------------
-#	For Debugginb
-#-------------------------------------
-#process.hcalTPTask.moduleParameters.debug = 0
-
-#-------------------------------------
 #	Some Settings before Finishing up
 #-------------------------------------
 process.hcalDigis.InputLabel = rawTag
+
+process.hcalOnlineHarvesting.subsystem = subsystem
+process.rawTask.subsystem = subsystem
+process.rawTask.tagFEDs = rawTagUntracked
+process.rawTask.tagReport = cms.untracked.InputTag("hcalDigis")
+
+#-------------------------------------
+#	Prepare all the Laser Tasks
+#-------------------------------------
+process.hbhehpdTask = process.laserTask.clone()
+process.hbhehpdTask.name = cms.untracked.string("HBHEHPDTask")
+process.hbhehpdTask.laserType = cms.untracked.uint32(3)
+
+process.hoTask = process.laserTask.clone()
+process.hoTask.name = cms.untracked.string("HOTask")
+process.hoTask.laserType = cms.untracked.uint32(4)
+
+process.hfTask = process.laserTask.clone()
+process.hfTask.name = cms.untracked.string("HFTask")
+process.hfTask.laserType = cms.untracked.uint32(5)
+
+process.hepmegaTask = process.laserTask.clone()
+process.hepmegaTask.name = cms.untracked.string("HEPMegaTask")
+process.hepmegaTask.laserType = cms.untracked.uint32(7)
+
+process.hemmegaTask = process.laserTask.clone()
+process.hemmegaTask.name = cms.untracked.string("HEMMegaTask")
+process.hemmegaTask.laserType = cms.untracked.uint32(8)
+
+process.hbpmegaTask = process.laserTask.clone()
+process.hbpmegaTask.name = cms.untracked.string("HBPMegaTask")
+process.hbpmegaTask.laserType = cms.untracked.uint32(9)
+
+process.hbmmegaTask = process.laserTask.clone()
+process.hbmmegaTask.name = cms.untracked.string("HBMMegaTask")
+process.hbmmegaTask.laserType = cms.untracked.uint32(10)
+
+process.qie11Task.runkeyVal = runType
+process.qie11Task.runkeyName = runTypeName
+process.qie11Task.tagQIE11 = cms.untracked.InputTag("hcalDigis")
+process.qie11Task.subsystem = cms.untracked.string("HcalCalib")
+process.qie11Task.laserType = cms.untracked.int32(12)
 
 #-------------------------------------
 #	Hcal DQM Tasks Sequence Definition
 #-------------------------------------
 process.tasksSequence = cms.Sequence(
-		process.ledTask
-		*process.laserTask
-		*process.pedestalTask
-		*process.raddamTask
+		process.pedestalTask
+		*process.hfRaddamTask
+		*process.rawTask
+		*process.hbhehpdTask
+		*process.hoTask
+		*process.hfTask
+		*process.hepmegaTask
+		*process.hemmegaTask
+		*process.hbpmegaTask
+		*process.hbmmegaTask
+		*process.umnioTask
+		*process.qie11Task
+)
+
+process.harvestingSequence = cms.Sequence(
+	process.hcalOnlineHarvesting
 )
 
 #-------------------------------------
@@ -138,6 +192,7 @@ process.tasksSequence = cms.Sequence(
 process.p = cms.Path(
 					process.hcalDigis
 					*process.tasksSequence
+					*process.harvestingSequence
                     *process.dqmEnv
                     *process.dqmSaver)
 

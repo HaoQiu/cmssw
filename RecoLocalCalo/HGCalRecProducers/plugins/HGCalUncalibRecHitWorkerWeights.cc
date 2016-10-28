@@ -73,13 +73,17 @@ HGCalUncalibRecHitWorkerWeights::HGCalUncalibRecHitWorkerWeights(const edm::Para
 void
 HGCalUncalibRecHitWorkerWeights::set(const edm::EventSetup& es)
 {
-  edm::ESHandle<HGCalGeometry> hgceeGeoHandle; 
-  edm::ESHandle<HGCalGeometry> hgchefGeoHandle; 
-  es.get<IdealGeometryRecord>().get("HGCalEESensitive",hgceeGeoHandle) ; 
-  es.get<IdealGeometryRecord>().get("HGCalHESiliconSensitive",hgchefGeoHandle) ; 
-  uncalibMaker_ee_.setGeometry(hgceeGeoHandle.product());
-  uncalibMaker_hef_.setGeometry(hgchefGeoHandle.product());
-  uncalibMaker_heb_.setGeometry(nullptr);
+  if (uncalibMaker_ee_.isSiFESim()) {
+    edm::ESHandle<HGCalGeometry> hgceeGeoHandle; 
+    es.get<IdealGeometryRecord>().get("HGCalEESensitive",hgceeGeoHandle) ; 
+    uncalibMaker_ee_.setGeometry(hgceeGeoHandle.product());
+  }
+  if (uncalibMaker_hef_.isSiFESim()) {
+    edm::ESHandle<HGCalGeometry> hgchefGeoHandle; 
+    es.get<IdealGeometryRecord>().get("HGCalHESiliconSensitive",hgchefGeoHandle) ; 
+    uncalibMaker_hef_.setGeometry(hgchefGeoHandle.product());
+  }  
+  uncalibMaker_heb_.setGeometry(nullptr);  
 }
 
 
@@ -94,8 +98,8 @@ HGCalUncalibRecHitWorkerWeights::run1( const edm::Event & evt,
 
 bool
 HGCalUncalibRecHitWorkerWeights::run2( const edm::Event & evt,
-                const HGCHEDigiCollection::const_iterator & itdg,
-                HGChefUncalibratedRecHitCollection & result )
+				       const HGCHEDigiCollection::const_iterator & itdg,
+				       HGChefUncalibratedRecHitCollection & result )
 {
   result.push_back(uncalibMaker_hef_.makeRecHit(*itdg));
   return true;
@@ -103,8 +107,8 @@ HGCalUncalibRecHitWorkerWeights::run2( const edm::Event & evt,
 
 bool
 HGCalUncalibRecHitWorkerWeights::run3( const edm::Event & evt,
-                const HGCHEDigiCollection::const_iterator & itdg,
-                HGChebUncalibratedRecHitCollection & result )
+				       const HGCBHDigiCollection::const_iterator & itdg,
+				       HGChebUncalibratedRecHitCollection & result )
 {
   result.push_back(uncalibMaker_heb_.makeRecHit(*itdg));
   return true;

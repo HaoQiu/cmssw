@@ -167,8 +167,7 @@ void CSCTriggerPrimitivesBuilder::build(const CSCBadChambers* badChambers,
                                         CSCCLCTPreTriggerCollection & oc_pretrig,
 					CSCCorrelatedLCTDigiCollection& oc_lct,
 					CSCCorrelatedLCTDigiCollection& oc_sorted_lct,
-					GEMCoPadDigiCollection& oc_gemcopad,
-					GEMCSCLCTDigiCollection& oc_gemcsclct)
+					GEMCoPadDigiCollection& oc_gemcopad)
 {
   // CSC geometry.
   CSCTriggerGeomManager* theGeom = CSCTriggerGeometry::get();
@@ -620,6 +619,12 @@ void CSCTriggerPrimitivesBuilder::build(const CSCBadChambers* badChambers,
 
   // run MPC simulation
   m_muonportcard->loadDigis(oc_lct);
+
+  // temporary hack to ensure that all MPC LCTs are read out
+  if (runOnData_) {
+    m_minBX = 5;
+    m_maxBX = 11;
+  }
 
   std::vector<csctf::TrackStub> result;
   for(int bx = m_minBX; bx <= m_maxBX; ++bx)

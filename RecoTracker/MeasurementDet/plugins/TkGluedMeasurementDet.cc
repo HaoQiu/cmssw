@@ -1,7 +1,7 @@
 #include "TkGluedMeasurementDet.h"
 #include "TrackingTools/MeasurementDet/interface/MeasurementDetException.h"
 #include "RecoTracker/TransientTrackingRecHit/interface/TSiStripMatchedRecHit.h"
-#include "Geometry/TrackerGeometryBuilder/interface/GluedGeomDet.h"
+#include "Geometry/CommonDetUnit/interface/GluedGeomDet.h"
 #include "RecoLocalTracker/SiStripRecHitConverter/interface/SiStripRecHitMatcher.h"
 #include "NonPropagatingDetMeasurements.h"
 #include "TrackingTools/PatternTools/interface/TrajectoryMeasurement.h"
@@ -15,6 +15,9 @@
 #include <memory>
 
 #include <typeinfo>
+
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+
 
 namespace {
   inline
@@ -130,6 +133,16 @@ bool TkGluedMeasurementDet::measurements( const TrajectoryStateOnSurface& stateO
    
    if (result.size()>oldSize) return true;
    
+   auto id = geomDet().geographicalId().subdetId()-3;
+   auto l = TOBDetId(geomDet().geographicalId()).layer();
+   bool killHIP = (1==l) && (2==id); //TOB1
+   killHIP &= stateOnThisDet.globalMomentum().perp2()>est.minPt2ForHitRecoveryInGluedDet();
+   if (killHIP) {
+        result.add(theInactiveHit, 0.F); 
+        return true;
+   }
+
+
    //LogDebug("TkStripMeasurementDet") << "No hit found on TkGlued. Testing strips...  ";
    const BoundPlane &gluedPlane = geomDet().surface();
    if (  // sorry for the big IF, but I want to exploit short-circuiting of logic
@@ -139,7 +152,8 @@ bool TkGluedMeasurementDet::measurements( const TrajectoryStateOnSurface& stateO
 				      (theMonoDet->hasAllGoodChannels() || 
 				       testStrips(stateOnThisDet,gluedPlane,*theMonoDet)
 				       )
-				      ) /*Mono OK*/ || 
+				      ) /*Mono OK*/ 
+                                     && // was || 
 				     (theStereoDet->isActive(data) && 
 				      (theStereoDet->hasAllGoodChannels() || 
 				       testStrips(stateOnThisDet,gluedPlane,*theStereoDet)

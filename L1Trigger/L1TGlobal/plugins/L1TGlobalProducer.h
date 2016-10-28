@@ -6,13 +6,11 @@
 
 #include <string>
 #include <vector>
-#include<iostream>
-#include<fstream>
-
-#include <boost/cstdint.hpp>
+#include <iostream>
+#include <fstream>
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -21,6 +19,10 @@
 #include "L1Trigger/L1TGlobal/interface/GlobalBoard.h"
 
 #include "CondFormats/L1TObjects/interface/L1TGlobalParameters.h"
+#include "L1Trigger/L1TGlobal/interface/GlobalParamsHelper.h"
+#include "L1Trigger/L1TGlobal/interface/PrescalesVetosHelper.h"
+
+
 
 class L1TGlobalParameters;
 class L1GtParameters;
@@ -33,7 +35,7 @@ class TriggerMenu;
 
 // class declaration
 
-class L1TGlobalProducer : public edm::EDProducer
+class L1TGlobalProducer : public edm::stream::EDProducer<>
 {
 
 public:
@@ -41,7 +43,7 @@ public:
     explicit L1TGlobalProducer(const edm::ParameterSet&);
     ~L1TGlobalProducer();
 
-    virtual void produce(edm::Event&, const edm::EventSetup&);
+    virtual void produce(edm::Event&, const edm::EventSetup&) override;
 
     static void fillDescriptions(edm::ConfigurationDescriptions & descriptions);
 
@@ -78,7 +80,7 @@ private:
     int m_totalBxInEvent;
 
     ///    active boards in L1 GT DAQ record 
-    boost::uint16_t m_activeBoardsGtDaq;
+    uint16_t m_activeBoardsGtDaq;
 
     /// length of BST record (in bytes) from event setup
     unsigned int m_bstLengthBytes;
@@ -88,17 +90,14 @@ private:
     unsigned long long m_l1GtBMCacheID;
 
     /// prescale factors
-    const L1GtPrescaleFactors* m_l1GtPfAlgo;
+    const l1t::PrescalesVetosHelper* m_l1GtPrescalesVetoes;
     unsigned long long m_l1GtPfAlgoCacheID;
-
-
 
     const std::vector<std::vector<int> >* m_prescaleFactorsAlgoTrig;
     std::vector<std::vector<int> > m_initialPrescaleFactorsAlgoTrig;
 
     /// CSV file for prescales
     std::string m_prescalesFile;
-
 
     /// trigger masks & veto masks
     const L1GtTriggerMask* m_l1GtTmAlgo;
@@ -107,14 +106,11 @@ private:
     const L1GtTriggerMask* m_l1GtTmVetoAlgo;
     unsigned long long m_l1GtTmVetoAlgoCacheID;
 
-
     const std::vector<unsigned int>* m_triggerMaskAlgoTrig;
     std::vector<unsigned int> m_initialTriggerMaskAlgoTrig;
 
-    const std::vector<unsigned int>* m_triggerMaskVetoAlgoTrig;
-    std::vector<unsigned int> m_initialTriggerMaskVetoAlgoTrig;
-
-private:
+    const std::vector<int>* m_triggerMaskVetoAlgoTrig;
+    std::vector<int> m_initialTriggerMaskVetoAlgoTrig;
 
     l1t::GlobalBoard* m_uGtBrd;
 
@@ -161,7 +157,6 @@ private:
     /// length of BST record (in bytes) from parameter set
     int m_psBstLengthBytes;
 
-
     /// prescale set used
     unsigned int m_prescaleSet;
 
@@ -174,12 +169,11 @@ private:
     ///     will overwrite the event setup
     bool m_algorithmTriggersUnmasked;
 
-
-private:
-
     /// verbosity level
     int m_verbosity;
+    bool m_printL1Menu;
     bool m_isDebugEnabled;
+    
 
 };
 

@@ -52,14 +52,14 @@ class L1TMicroGMTInputProducer : public edm::EDProducer {
       static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
    private:
-      virtual void beginJob() ;
-      virtual void produce(edm::Event&, const edm::EventSetup&);
-      virtual void endJob() ;
+      virtual void beginJob() override ;
+      virtual void produce(edm::Event&, const edm::EventSetup&) override ;
+      virtual void endJob() override ;
 
-      virtual void beginRun(edm::Run&, edm::EventSetup const&);
-      virtual void endRun(edm::Run&, edm::EventSetup const&);
-      virtual void beginLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
-      virtual void endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&);
+      virtual void beginRun(const edm::Run&, edm::EventSetup const&) override ;
+      virtual void endRun(const edm::Run&, edm::EventSetup const&) override ;
+      virtual void beginLuminosityBlock(const edm::LuminosityBlock&, edm::EventSetup const&) override ;
+      virtual void endLuminosityBlock(const edm::LuminosityBlock&, edm::EventSetup const&) override ;
 
       void openFile();
       void skipHeader();
@@ -161,10 +161,10 @@ L1TMicroGMTInputProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 {
   using namespace edm;
 
-  std::auto_ptr<RegionalMuonCandBxCollection> barrelMuons (new RegionalMuonCandBxCollection());
-  std::auto_ptr<RegionalMuonCandBxCollection> overlapMuons (new RegionalMuonCandBxCollection());
-  std::auto_ptr<RegionalMuonCandBxCollection> endcapMuons (new RegionalMuonCandBxCollection());
-  std::auto_ptr<MuonCaloSumBxCollection> towerSums (new MuonCaloSumBxCollection());
+  std::unique_ptr<RegionalMuonCandBxCollection> barrelMuons (new RegionalMuonCandBxCollection());
+  std::unique_ptr<RegionalMuonCandBxCollection> overlapMuons (new RegionalMuonCandBxCollection());
+  std::unique_ptr<RegionalMuonCandBxCollection> endcapMuons (new RegionalMuonCandBxCollection());
+  std::unique_ptr<MuonCaloSumBxCollection> towerSums (new MuonCaloSumBxCollection());
 
   RegionalMuonCand mu;
   MuonCaloSum tSum;
@@ -302,10 +302,10 @@ L1TMicroGMTInputProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   // std::sort(overlapMuons->begin(0), overlapMuons->end(0), L1TMicroGMTInputProducer::cmpProc);
   // std::sort(endcapMuons->begin(0), endcapMuons->end(0), L1TMicroGMTInputProducer::cmpProc);
 
-  iEvent.put(barrelMuons, "BarrelTFMuons");
-  iEvent.put(overlapMuons, "OverlapTFMuons");
-  iEvent.put(endcapMuons, "ForwardTFMuons");
-  iEvent.put(towerSums, "TriggerTowerSums");
+  iEvent.put(std::move(barrelMuons), "BarrelTFMuons");
+  iEvent.put(std::move(overlapMuons), "OverlapTFMuons");
+  iEvent.put(std::move(endcapMuons), "ForwardTFMuons");
+  iEvent.put(std::move(towerSums), "TriggerTowerSums");
   m_currEvt++;
 
 }
@@ -323,25 +323,25 @@ L1TMicroGMTInputProducer::endJob() {
 
 // ------------ method called when starting to processes a run  ------------
 void
-L1TMicroGMTInputProducer::beginRun(edm::Run&, edm::EventSetup const&)
+L1TMicroGMTInputProducer::beginRun(const edm::Run&, edm::EventSetup const&)
 {
 }
 
 // ------------ method called when ending the processing of a run  ------------
 void
-L1TMicroGMTInputProducer::endRun(edm::Run&, edm::EventSetup const&)
+L1TMicroGMTInputProducer::endRun(const edm::Run&, edm::EventSetup const&)
 {
 }
 
 // ------------ method called when starting to processes a luminosity block  ------------
 void
-L1TMicroGMTInputProducer::beginLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&)
+L1TMicroGMTInputProducer::beginLuminosityBlock(const edm::LuminosityBlock&, edm::EventSetup const&)
 {
 }
 
 // ------------ method called when ending the processing of a luminosity block  ------------
 void
-L1TMicroGMTInputProducer::endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&)
+L1TMicroGMTInputProducer::endLuminosityBlock(const edm::LuminosityBlock&, edm::EventSetup const&)
 {
 }
 

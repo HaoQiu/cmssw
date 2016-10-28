@@ -91,7 +91,7 @@ public:
     /// run the uGT GTL (Conditions and Algorithms)
     void runGTL(edm::Event& iEvent, const edm::EventSetup& evSetup, const TriggerMenu* m_l1GtMenu,
         const bool produceL1GtObjectMapRecord,
-        const int iBxInEvent, std::auto_ptr<GlobalObjectMapRecord>& gtObjectMapRecord, //GTO
+        const int iBxInEvent, std::unique_ptr<GlobalObjectMapRecord>& gtObjectMapRecord, //GTO
         const unsigned int numberPhysTriggers,
         const int nrL1Mu,
         const int nrL1EG,
@@ -105,14 +105,14 @@ public:
         const unsigned int numberPhysTriggers,
         const std::vector<int>& prescaleFactorsAlgoTrig,
 	const std::vector<unsigned int>& triggerMaskAlgoTrig,
-	const std::vector<unsigned int>& triggerMaskVetoAlgoTrig,
+	const std::vector<int>& triggerMaskVetoAlgoTrig,
         const bool algorithmTriggersUnprescaled,
         const bool algorithmTriggersUnmasked );
 
 
      /// Fill the Daq Records
      void fillAlgRecord(int iBxInEvent, 
-                        std::auto_ptr<GlobalAlgBlkBxCollection>& uGtAlgRecord,
+                        std::unique_ptr<GlobalAlgBlkBxCollection>& uGtAlgRecord,
 			int prescaleSet,
 			int menuUUID,
 			int firmwareUUID);
@@ -268,10 +268,11 @@ private:
 
     // Flags for the OR of all algorithms at various stages. (Single bx)
     bool m_algInitialOr;
+    bool m_algIntermOr;
     bool m_algPrescaledOr;
     bool m_algFinalOr;
     bool m_algFinalOrVeto;
-    bool m_algFinalOrPreVeto;
+    
     
     // Counter for number of events seen by this board
     unsigned int m_boardEventCount;

@@ -1,38 +1,31 @@
-/***************************************************************************
-                          DDLDivision.cc  -  description
-                             -------------------
-    begin                : Friday, April 23, 2004
-    email                : case@ucdhep.ucdavis.edu
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *           DDDParser sub-component of DDD                                *
- *                                                                         *
- ***************************************************************************/
-
 #include "DetectorDescription/Parser/src/DDLDivision.h"
-#include "DetectorDescription/Parser/src/DDDividedBox.h"
-#include "DetectorDescription/Parser/src/DDDividedTubs.h"
-#include "DetectorDescription/Parser/src/DDDividedTrd.h"
-#include "DetectorDescription/Parser/src/DDDividedCons.h"
-#include "DetectorDescription/Parser/src/DDDividedPolycone.h"
-#include "DetectorDescription/Parser/src/DDDividedPolyhedra.h"
 
-#include "DetectorDescription/Core/interface/DDName.h"
+#include <stddef.h>
+#include <map>
+#include <ostream>
+#include <utility>
+
 #include "DetectorDescription/Core/interface/DDAxes.h"
+#include "DetectorDescription/Core/interface/DDLogicalPart.h"
+#include "DetectorDescription/Core/interface/DDName.h"
 #include "DetectorDescription/Core/interface/DDSolid.h"
 #include "DetectorDescription/Core/interface/DDSolidShapes.h"
-#include "DetectorDescription/Core/interface/DDLogicalPart.h"
-#include "DetectorDescription/Base/interface/DDdebug.h"
-
 #include "DetectorDescription/ExprAlgo/interface/ClhepEvaluator.h"
+#include "DetectorDescription/Parser/interface/DDLElementRegistry.h"
+#include "DetectorDescription/Parser/src/DDDividedBox.h"
+#include "DetectorDescription/Parser/src/DDDividedCons.h"
+#include "DetectorDescription/Parser/src/DDDividedGeometryObject.h"
+#include "DetectorDescription/Parser/src/DDDividedPolycone.h"
+#include "DetectorDescription/Parser/src/DDDividedPolyhedra.h"
+#include "DetectorDescription/Parser/src/DDDividedTrd.h"
+#include "DetectorDescription/Parser/src/DDDividedTubs.h"
+#include "DetectorDescription/Parser/src/DDXMLElement.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+
+class DDCompactView;
 
 DDLDivision::DDLDivision( DDLElementRegistry* myreg )
   : DDXMLElement( myreg )
-{}
-
-DDLDivision::~DDLDivision( void )
 {}
 
 void
@@ -42,8 +35,6 @@ DDLDivision::preProcessElement( const std::string& name, const std::string& nmsp
 void
 DDLDivision::processElement( const std::string& name, const std::string& nmspace, DDCompactView& cpv )
 {
-  DCOUT_V('P', "DDLDivision::processElement started");
-
   DDXMLAttribute atts = getAttributeSet();
 
   DDName parent = getDDName(nmspace, "parent");
@@ -87,8 +78,6 @@ DDLDivision::processElement( const std::string& name, const std::string& nmspace
   else if (atts.find("width")     != atts.end()
 	   && atts.find("offset") != atts.end())
   {
-    DCOUT_V ('D', " width = " << ev.eval(nmspace, atts.find("width")->second) << std::endl);
-    DCOUT_V ('D', " offset = " << ev.eval(nmspace, atts.find("offset")->second) << std::endl);
     div = DDDivision(getDDName(nmspace)
 		     , parent
 		     , DDAxes(ax)
@@ -106,8 +95,6 @@ DDLDivision::processElement( const std::string& name, const std::string& nmspace
   delete dg;
 
   clear();
-
-  DCOUT_V('P', "DDLDivision::processElement completed");
 }
 
 DDDividedGeometryObject*

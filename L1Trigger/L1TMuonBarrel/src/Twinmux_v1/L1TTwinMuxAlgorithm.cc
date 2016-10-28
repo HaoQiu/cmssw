@@ -30,7 +30,7 @@ public:
   L1TTwinMuxAlgortithm();
   ~L1TTwinMuxAlgortithm() {}
 
-  inline std::auto_ptr<L1MuDTChambPhContainer> produce( edm::Handle<L1MuDTChambPhContainer> phiDigis,
+  inline std::unique_ptr<L1MuDTChambPhContainer> produce( edm::Handle<L1MuDTChambPhContainer> phiDigis,
                                                         edm::Handle<L1MuDTChambThContainer> thetaDigis,
                                                         edm::Handle<RPCDigiCollection> rpcDigis,
                                                         const edm::EventSetup& c);
@@ -42,18 +42,22 @@ L1TTwinMuxAlgortithm::L1TTwinMuxAlgortithm() {
 }
 
 
-inline std::auto_ptr<L1MuDTChambPhContainer> L1TTwinMuxAlgortithm::produce(
+inline std::unique_ptr<L1MuDTChambPhContainer> L1TTwinMuxAlgortithm::produce(
                                                             edm::Handle<L1MuDTChambPhContainer> phiDigis,
                                                             edm::Handle<L1MuDTChambThContainer> thetaDigis,
                                                             edm::Handle<RPCDigiCollection> rpcDigis,
                                                             const edm::EventSetup& c) {
 
 
-  TriggerPrimitiveCollection *l1tmtpp =  L1TMuonTPPproducer(phiDigis,thetaDigis,rpcDigis,c);
+  TriggerPrimitiveCollection *l1tmtpp = new TriggerPrimitiveCollection();
+  L1TMuonTPPproducer(phiDigis,thetaDigis,rpcDigis,l1tmtpp,c);
 
-  std::auto_ptr<MBLTContainer> mblt = MBLTProducer(l1tmtpp);
-  L1ITMuonBarrelPrimitiveProducer *lmbpp = new L1ITMuonBarrelPrimitiveProducer(mblt);
-  std::auto_ptr<L1MuDTChambPhContainer> l1ttma = lmbpp->produce(c);
+  std::unique_ptr<MBLTContainer> mblt = MBLTProducer(l1tmtpp);
+  std::unique_ptr<L1ITMuonBarrelPrimitiveProducer> lmbpp ( new L1ITMuonBarrelPrimitiveProducer(std::move(mblt)));
+  std::unique_ptr<L1MuDTChambPhContainer> l1ttma = lmbpp->produce(c);
+
+  delete l1tmtpp;
+
   return l1ttma;
 
 }

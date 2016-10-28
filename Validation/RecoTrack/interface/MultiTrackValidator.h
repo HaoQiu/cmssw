@@ -54,6 +54,7 @@ class MultiTrackValidator : public DQMEDAnalyzer, protected MultiTrackValidatorB
   std::string dirName_;
 
   bool useGsf;
+  const double simPVMaxZ_;
   // select tracking particles 
   //(i.e. "denominator" of the efficiency ratio)
   TrackingParticleSelector tpSelector;				      
@@ -65,7 +66,6 @@ class MultiTrackValidator : public DQMEDAnalyzer, protected MultiTrackValidatorB
   edm::EDGetTokenT<edm::View<reco::Track> > labelTokenForDrCalculation;
   edm::EDGetTokenT<edm::View<reco::Vertex> > recoVertexToken_;
   edm::EDGetTokenT<reco::VertexToTrackingVertexAssociator> vertexAssociatorToken_;
-  std::vector<edm::EDGetTokenT<std::vector<int>>> seedToTrackTokens_;
 
   std::vector<MonitorElement *> h_reco_coll, h_assoc_coll, h_assoc2_coll, h_simul_coll, h_looper_coll, h_pileup_coll;
   std::vector<MonitorElement *> h_assoc_coll_allPt, h_simul_coll_allPt;

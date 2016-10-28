@@ -28,7 +28,7 @@ class ParticleReplacerBase
 {
  public:
   explicit ParticleReplacerBase(const edm::ParameterSet&);
-  virtual ~ParticleReplacerBase() {}
+  virtual ~ParticleReplacerBase() noexcept(false) {}
 
   virtual void declareExtraProducts(MCParticleReplacer*) {}
 
@@ -37,7 +37,7 @@ class ParticleReplacerBase
   virtual void endRun() {}
   virtual void endJob() {}
 
-  virtual std::auto_ptr<HepMC::GenEvent> produce(const std::vector<reco::Particle>&, const reco::Vertex* evtVtx = 0, const HepMC::GenEvent* genEvt = 0, MCParticleReplacer* = 0) = 0;
+  virtual std::unique_ptr<HepMC::GenEvent> produce(const std::vector<reco::Particle>&, const reco::Vertex* evtVtx = 0, const HepMC::GenEvent* genEvt = 0, MCParticleReplacer* = 0) = 0;
 
   unsigned int tried_;
   unsigned int passed_;

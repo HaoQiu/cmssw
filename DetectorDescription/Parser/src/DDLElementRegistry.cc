@@ -1,18 +1,12 @@
-/***************************************************************************
-                          DDLElementRegistry.cc  -  description
-                             -------------------
-    begin                : Wed Oct 24 2001
-    email                : case@ucdhep.ucdavis.edu
- ***************************************************************************/
+#include <stddef.h>
+#include <algorithm>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
 
-/***************************************************************************
- *                                                                         *
- *           DDDParser sub-component of DDD                                *
- *  Nov 25, 2003 : note that comments on DDLRotation are for future        *
- *                 changes which break backward compatibility.             *
- *                                                                         *
- ***************************************************************************/
-
+#include "DetectorDescription/Base/interface/Singleton.h"
+#include "DetectorDescription/Parser/interface/DDLElementRegistry.h"
 #include "DetectorDescription/Parser/src/DDLAlgorithm.h"
 #include "DetectorDescription/Parser/src/DDLBooleanSolid.h"
 #include "DetectorDescription/Parser/src/DDLBox.h"
@@ -20,8 +14,8 @@
 #include "DetectorDescription/Parser/src/DDLCone.h"
 #include "DetectorDescription/Parser/src/DDLDivision.h"
 #include "DetectorDescription/Parser/src/DDLElementaryMaterial.h"
-#include "DetectorDescription/Parser/src/DDLEllipticalTube.h"
 #include "DetectorDescription/Parser/src/DDLEllipsoid.h"
+#include "DetectorDescription/Parser/src/DDLEllipticalTube.h"
 #include "DetectorDescription/Parser/src/DDLLogicalPart.h"
 #include "DetectorDescription/Parser/src/DDLMap.h"
 #include "DetectorDescription/Parser/src/DDLNumeric.h"
@@ -31,8 +25,8 @@
 #include "DetectorDescription/Parser/src/DDLPosPart.h"
 #include "DetectorDescription/Parser/src/DDLPseudoTrap.h"
 #include "DetectorDescription/Parser/src/DDLReflectionSolid.h"
-#include "DetectorDescription/Parser/src/DDLRotationByAxis.h"
 #include "DetectorDescription/Parser/src/DDLRotationAndReflection.h"
+#include "DetectorDescription/Parser/src/DDLRotationByAxis.h"
 #include "DetectorDescription/Parser/src/DDLRotationSequence.h"
 #include "DetectorDescription/Parser/src/DDLShapelessSolid.h" 
 #include "DetectorDescription/Parser/src/DDLSpecPar.h"
@@ -42,11 +36,8 @@
 #include "DetectorDescription/Parser/src/DDLTrapezoid.h"
 #include "DetectorDescription/Parser/src/DDLTubs.h"
 #include "DetectorDescription/Parser/src/DDLVector.h"
-
-#include "DetectorDescription/Base/interface/DDdebug.h"
-#include "DetectorDescription/Parser/interface/DDLElementRegistry.h"
-
-#include <iostream>
+#include "DetectorDescription/Parser/src/DDXMLElement.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 DDLElementRegistry::DDLElementRegistry( void )
 {}
@@ -73,20 +64,12 @@ DDLElementRegistry::~DDLElementRegistry( void )
 DDXMLElement*
 DDLElementRegistry::getElement( const std::string& name )
 {
-  DCOUT_V('P',"myRegistry_->getElementRegistry(" << name << ")"); 
-
-  //  DDXMLElement* myret = instance()->DDXMLElementRegistry::getElement(name);
   RegistryMap::iterator it = registry_.find(name);
-  //   std::cout << "it found name? "<< name << " " ;
-  //   if (it != registry_.end() ) std::cout << "yes"; else std::cout << "no";
-  //   std::cout << std::endl;
-  //   std::cout << "there are " << registry_.size() << " elements-types so far." << std::endl; 
   DDXMLElement* myret = NULL;
   if( it != registry_.end())
   {
     myret = it->second;
   } else {
-    //    std::cout << " making first and only " << name << std::endl;
     // Make the Solid handlers and register them.
     if (name == "Box")
     {
@@ -108,7 +91,7 @@ DDLElementRegistry::getElement( const std::string& name )
     {
       myret = new DDLPseudoTrap(this);
     }
-    else if (name == "Tubs" || name == "Tube" || name == "TruncTubs")
+    else if (name == "Tubs" || name == "CutTubs" || name == "Tube" || name == "TruncTubs")
     {
       myret = new DDLTubs(this);
     }
@@ -230,19 +213,10 @@ DDLElementRegistry::getElement( const std::string& name )
     //  XML elements of the DDLSchema are taken care of by this.
     else
     {
-      //	myret = instance()->DDXMLElementRegistry::getElement("***");
-	
       myret = new DDXMLElement(this);
-      //	std::cout << "about to register a " << "***" << std::endl;
-      // 	registry_["***"] = myret;
-      // 	DCOUT_V('P',  "WARNING:  The default (DDLElementRegistry)  was used for "
-      // 		<< name << " since there was no specific handler." << std::endl);
-      // 	return myret;
     }
     
     // Actually register the thing
-    //   instance()->registerElement(name, myret);
-    //      std::cout << "about to register a " << name << std::endl;
     registry_[name] = myret;
   }
   return myret;

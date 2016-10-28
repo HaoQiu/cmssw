@@ -51,7 +51,7 @@ namespace edm {
     
   public:
     EDConsumerBase() : frozen_(false) {}
-    virtual ~EDConsumerBase();
+    virtual ~EDConsumerBase() noexcept(false);
     
     // disallow copying
     EDConsumerBase(EDConsumerBase const&) = delete;
@@ -78,16 +78,12 @@ namespace edm {
     
     // ---------- member functions ---------------------------
     void updateLookup(BranchType iBranchType,
-                      ProductResolverIndexHelper const&);
+                      ProductResolverIndexHelper const&,
+                      bool iPrefetchMayGet);
     
     typedef ProductLabels Labels;
     void labelsForToken(EDGetToken iToken, Labels& oLabels) const;
     
-    void modulesDependentUpon(std::string const& iProcessName,
-                              std::string const& iModuleLabel,
-                              bool iPrint,
-                              std::vector<char const*>& oModuleLabels) const;
-
     void modulesWhoseProductsAreConsumed(std::vector<ModuleDescription const*>& modules,
                                          ProductRegistry const& preg,
                                          std::map<std::string, ModuleDescription const*> const& labelsToDesc,

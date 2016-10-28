@@ -577,13 +577,26 @@ bool HLTL1TSeed::seedsL1TriggerObjectMaps(edm::Event& iEvent,
 
         for (std::vector<SingleCombInCond>::const_iterator itComb = (*condComb).begin(); itComb != (*condComb).end(); itComb++) {
 
+            LogTrace("HLTL1TSeed")
+            << setw(15) << "\tnew combination" << endl;
+
             // loop over objects in a combination for a given condition
             //
             for (SingleCombInCond::const_iterator itObject = (*itComb).begin(); itObject != (*itComb).end(); itObject++) {
 
-              // loop over types for the object in a combination.  This object might have more then one type (i.e. mu-eg)
-              //
-              for (size_t iType =0; iType < condObjType.size(); iType++) {
+                // in case of object-less triggers (e.g. L1_ZeroBias) condObjType vector is empty, so don't seed!
+                //
+                if(condObjType.size() == 0) {
+
+                  LogTrace("HLTL1TSeed")
+                  << "\talgoName = " << objMap->algoName() << " is object-less L1 algorithm, so do not attempt to store any objects to the list of seeds.\n"
+                  << std::endl;
+                  continue;
+
+                }
+
+                // the index of the object type is the same as the index of the object
+                size_t iType = std::distance((*itComb).begin(), itObject);
 
                 // get object type and push indices on the list
                 //
@@ -659,8 +672,6 @@ bool HLTL1TSeed::seedsL1TriggerObjectMaps(edm::Event& iEvent,
 
                 } // end switch objTypeVal
 
-            } // end for iType 
-
           } // end for itObj
 
         } // end for itComb
@@ -721,8 +732,12 @@ bool HLTL1TSeed::seedsL1TriggerObjectMaps(edm::Event& iEvent,
     
         for (std::list<int>::const_iterator itObj = listMuon.begin(); itObj != listMuon.end(); ++itObj) {
     	
-    	    l1t::MuonRef myref(muons, *itObj);
-    	    filterproduct.addObject(trigger::TriggerL1Mu, myref);
+
+          // Transform to index for Bx = 0 to begin of BxVector
+          unsigned int index = muons->begin(0) - muons->begin() + *itObj;
+
+    	  l1t::MuonRef myref(muons, index);
+    	  filterproduct.addObject(trigger::TriggerL1Mu, myref);
 
         }
 
@@ -746,8 +761,11 @@ bool HLTL1TSeed::seedsL1TriggerObjectMaps(edm::Event& iEvent,
     
         for (std::list<int>::const_iterator itObj = listEG.begin(); itObj != listEG.end(); ++itObj) {
 
-    	    l1t::EGammaRef myref(egammas, *itObj);
-    	    filterproduct.addObject(trigger::TriggerL1EG, myref);
+          // Transform to begin of BxVector
+          unsigned int index = egammas->begin(0) - egammas->begin() + *itObj;
+
+    	  l1t::EGammaRef myref(egammas, index);
+    	  filterproduct.addObject(trigger::TriggerL1EG, myref);
 
         } 
 
@@ -771,8 +789,13 @@ bool HLTL1TSeed::seedsL1TriggerObjectMaps(edm::Event& iEvent,
       else {
   
         for (std::list<int>::const_iterator itObj = listJet.begin(); itObj != listJet.end(); ++itObj) {
-          l1t::JetRef myref(jets, *itObj);
+
+          // Transform to begin of BxVector
+          unsigned int index = jets->begin(0) - jets->begin() + *itObj;
+
+          l1t::JetRef myref(jets, index);
           filterproduct.addObject(trigger::TriggerL1Jet, myref); 
+
         }
 
       }
@@ -795,8 +818,13 @@ bool HLTL1TSeed::seedsL1TriggerObjectMaps(edm::Event& iEvent,
       else {
   
         for (std::list<int>::const_iterator itObj = listTau.begin(); itObj != listTau.end(); ++itObj) {
-          l1t::TauRef myref(taus, *itObj);
+
+          // Transform to begin of BxVector
+          unsigned int index = taus->begin(0) - taus->begin() + *itObj;
+
+          l1t::TauRef myref(taus, index);
           filterproduct.addObject(trigger::TriggerL1Tau, myref); 
+
         }
 
       }

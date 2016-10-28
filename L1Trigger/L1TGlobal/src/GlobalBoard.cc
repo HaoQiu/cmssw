@@ -179,10 +179,17 @@ void l1t::GlobalBoard::receiveCaloObjectData(edm::Event& iEvent,
 	     if( i < m_bxFirst_ || i > m_bxLast_ ) continue;
 
               //Loop over EG in this bx
+	      int nObj = 0;
               for(std::vector<l1t::EGamma>::const_iterator eg = egData->begin(i); eg != egData->end(i); ++eg) {
 
-	        (*m_candL1EG).push_back(i,&(*eg));
-	        LogDebug("L1TGlobal") << "EG  Pt " << eg->hwPt() << " Eta  " << eg->hwEta() << " Phi " << eg->hwPhi() << "  Qual " << eg->hwQual() <<"  Iso " << eg->hwIso() << std::endl;
+	        if(nObj<nrL1EG) {
+		  (*m_candL1EG).push_back(i,&(*eg));
+	        } else {
+		  edm::LogWarning("L1TGlobal") << " Too many EG ("<<nObj<<") for uGT Configuration maxEG =" <<nrL1EG << std::endl;
+		}
+		LogDebug("L1TGlobal") << "EG  Pt " << eg->hwPt() << " Eta  " << eg->hwEta() << " Phi " << eg->hwPhi() << "  Qual " << eg->hwQual() <<"  Iso " << eg->hwIso() << std::endl;
+		
+		nObj++;
               } //end loop over EG in bx
 	   } //end loop over bx   
 
@@ -211,11 +218,19 @@ void l1t::GlobalBoard::receiveCaloObjectData(edm::Event& iEvent,
 	     if( i < m_bxFirst_ || i > m_bxLast_ ) continue;
 
               //Loop over tau in this bx
+	      int nObj = 0;
               for(std::vector<l1t::Tau>::const_iterator tau = tauData->begin(i); tau != tauData->end(i); ++tau) {
 
-	        (*m_candL1Tau).push_back(i,&(*tau));
+	        if(nObj<nrL1Tau) {
+		   (*m_candL1Tau).push_back(i,&(*tau));
+	        } else {
+		  edm::LogWarning("L1TGlobal") << " Too many Tau ("<<nObj<<") for uGT Configuration maxTau =" <<nrL1Tau << std::endl;
+		}
+		   
 	        LogDebug("L1TGlobal") << "tau  Pt " << tau->hwPt() << " Eta  " << tau->hwEta() << " Phi " << tau->hwPhi() << "  Qual " << tau->hwQual() <<"  Iso " << tau->hwIso() << std::endl;
-              } //end loop over tau in bx
+                nObj++;
+		
+	      } //end loop over tau in bx
 	   } //end loop over bx   
 
         } //end if over valid tau data
@@ -243,10 +258,17 @@ void l1t::GlobalBoard::receiveCaloObjectData(edm::Event& iEvent,
 	     if( i < m_bxFirst_ || i > m_bxLast_ ) continue;
 
               //Loop over jet in this bx
+	      int nObj = 0;
               for(std::vector<l1t::Jet>::const_iterator jet = jetData->begin(i); jet != jetData->end(i); ++jet) {
 
-	        (*m_candL1Jet).push_back(i,&(*jet));
+	        if(nObj<nrL1Jet) {
+		   (*m_candL1Jet).push_back(i,&(*jet));
+	        } else {
+		  edm::LogWarning("L1TGlobal") << " Too many Jets ("<<nObj<<") for uGT Configuration maxJet =" <<nrL1Jet << std::endl;
+		}
+
 	        LogDebug("L1TGlobal") << "Jet  Pt " << jet->hwPt() << " Eta  " << jet->hwEta() << " Phi " << jet->hwPhi() << "  Qual " << jet->hwQual() <<"  Iso " << jet->hwIso() << std::endl;
+		nObj++;
               } //end loop over jet in bx
 	   } //end loop over bx   
 
@@ -282,21 +304,38 @@ void l1t::GlobalBoard::receiveCaloObjectData(edm::Event& iEvent,
 /*  In case we need to split these out
 	          switch ( etsum->getType() ) {
 		     case l1t::EtSum::EtSumType::kMissingEt:
-		       (*m_candETM).push_back(i,&(*etsum));
-		       LogDebug("L1TGlobal") << "ETM:  Pt " << etsum->hwPt() <<  " Phi " << etsum->hwPhi()  << std::endl;
+		       {
+			 //(*m_candETM).push_back(i,&(*etsum));
+			 LogDebug("L1TGlobal") << "ETM:  Pt " << etsum->hwPt() <<  " Phi " << etsum->hwPhi()  << std::endl;
+		       }
 		       break; 
 		     case l1t::EtSum::EtSumType::kMissingHt:
-		       (*m_candHTM.push_back(i,&(*etsum);
-		       LogDebug("L1TGlobal") << "HTM:  Pt " << etsum->hwPt() <<  " Phi " << etsum->hwPhi()  << std::endl;
+		       {
+			 //(*m_candHTM).push_back(i,&(*etsum));
+			 LogDebug("L1TGlobal") << "HTM:  Pt " << etsum->hwPt() <<  " Phi " << etsum->hwPhi()  << std::endl;
+		       }
 		       break; 		     
 		     case l1t::EtSum::EtSumType::kTotalEt:
-		       (*m_candETT.push_back(i,&(*etsum);
-		       LogDebug("L1TGlobal") << "ETT:  Pt " << etsum->hwPt() << std::endl;
+		       {
+			 //(*m_candETT).push_back(i,&(*etsum));
+			 LogDebug("L1TGlobal") << "ETT:  Pt " << etsum->hwPt() << std::endl;
+		       }
 		       break; 		     
 		     case l1t::EtSum::EtSumType::kTotalHt:
-		       (*m_candHTT.push_back(i,&(*etsum);
-		       LogDebug("L1TGlobal") << "HTT:  Pt " << etsum->hwPt() << std::endl;
-		       break; 		     
+		       {
+			 //(*m_candHTT).push_back(i,&(*etsum));
+			 LogDebug("L1TGlobal") << "HTT:  Pt " << etsum->hwPt() << std::endl;
+		       }
+		       break;
+		     case l1t::EtSum::EtSumType::kTowerCount:
+		       {
+			 //(*m_candTowerCount).push_back(i,&(*etsum));
+			 LogDebug("L1TGlobal") << "TowerCount: " << etsum->hwPt() << std::endl;
+		       }
+		       break;
+		     default:
+		       LogDebug("L1TGlobal") << "Default encounted " << std::endl;
+		       break;
 		  }
 */
 	      
@@ -346,10 +385,17 @@ void l1t::GlobalBoard::receiveMuonObjectData(edm::Event& iEvent,
 	     if( i < m_bxFirst_ || i > m_bxLast_ ) continue;
 
               //Loop over Muons in this bx
+	      int nObj = 0;
               for(std::vector<l1t::Muon>::const_iterator mu = muonData->begin(i); mu != muonData->end(i); ++mu) {
 
-	        (*m_candL1Mu).push_back(i,&(*mu));
+	        if(nObj<nrL1Mu) {
+		   (*m_candL1Mu).push_back(i,&(*mu));
+	        } else {
+		  edm::LogWarning("L1TGlobal") << " Too many Muons ("<<nObj<<") for uGT Configuration maxMu =" <<nrL1Mu << std::endl;
+		}
+		   
 	        LogDebug("L1TGlobal") << "Muon  Pt " << mu->hwPt() << " Eta  " << mu->hwEta() << " Phi " << mu->hwPhi() << "  Qual " << mu->hwQual() <<"  Iso " << mu->hwIso() << std::endl;
+		nObj++;
               } //end loop over muons in bx
 	   } //end loop over bx   
 
@@ -413,7 +459,7 @@ void l1t::GlobalBoard::runGTL(
         edm::Event& iEvent, const edm::EventSetup& evSetup, const TriggerMenu* m_l1GtMenu,
         const bool produceL1GtObjectMapRecord,
         const int iBxInEvent,
-        std::auto_ptr<GlobalObjectMapRecord>& gtObjectMapRecord,  
+        std::unique_ptr<GlobalObjectMapRecord>& gtObjectMapRecord,  
         const unsigned int numberPhysTriggers,
         const int nrL1Mu,
         const int nrL1EG,
@@ -430,7 +476,7 @@ void l1t::GlobalBoard::runGTL(
      m_uGtAlgBlk.reset();
      m_algInitialOr=false;
      m_algPrescaledOr=false;
-     m_algFinalOrPreVeto=false;
+     m_algIntermOr=false;
      m_algFinalOr=false;
      m_algFinalOrVeto=false;
      
@@ -467,7 +513,7 @@ void l1t::GlobalBoard::runGTL(
 
         iChip++;
 
-       AlgorithmEvaluation::ConditionEvaluationMap& cMapResults =
+	AlgorithmEvaluation::ConditionEvaluationMap& cMapResults =
                m_conditionResultMaps[iChip];
 
 
@@ -654,7 +700,7 @@ void l1t::GlobalBoard::runGTL(
                 }
                     break;
                 case CondNull: {
-
+		  
                     // do nothing
 
                 }
@@ -746,7 +792,7 @@ void l1t::GlobalBoard::runGTL(
 	    std::ostringstream myCout1;
 	    objMap.print(myCout1);
 	    
-	    LogTrace("L1TGlobal") << myCout1.str() << std::endl;
+	    LogTrace("L1TGlobal")  << myCout1.str() << std::endl;
 	  }
 
 	  objMapVec.push_back(objMap);
@@ -787,8 +833,8 @@ void l1t::GlobalBoard::runFDL(edm::Event& iEvent,
         const unsigned int numberPhysTriggers,
 	const std::vector<int>& prescaleFactorsAlgoTrig,
 	const std::vector<unsigned int>& triggerMaskAlgoTrig,
-	const std::vector<unsigned int>& triggerMaskVetoAlgoTrig,
-        const bool algorithmTriggersUnprescaled,
+        const std::vector<int>& triggerMaskVetoAlgoTrig,
+	const bool algorithmTriggersUnprescaled,
         const bool algorithmTriggersUnmasked ){
 
 
@@ -840,25 +886,33 @@ void l1t::GlobalBoard::runFDL(edm::Event& iEvent,
 
 	bool bitValue = m_uGtAlgBlk.getAlgoDecisionInitial( iBit );
 	if( bitValue ){
-	  if( prescaleFactorsAlgoTrig.at(iBit) != 1 ){
+	  // Make sure algo bit in range, warn otherwise
+	  if( iBit < prescaleFactorsAlgoTrig.size() ){
+	    if( prescaleFactorsAlgoTrig.at(iBit) != 1 ){
+	      
+	      (m_prescaleCounterAlgoTrig.at(inBxInEvent).at(iBit))--;
+	      if( m_prescaleCounterAlgoTrig.at(inBxInEvent).at(iBit) == 0 ){
 
-	    (m_prescaleCounterAlgoTrig.at(inBxInEvent).at(iBit))--;
-	    if( m_prescaleCounterAlgoTrig.at(inBxInEvent).at(iBit) == 0 ){
-
-	      // bit already true in algoDecisionWord, just reset counter
-	      m_prescaleCounterAlgoTrig.at(inBxInEvent).at(iBit) = prescaleFactorsAlgoTrig.at(iBit);
-	      temp_algPrescaledOr = true;
-	    } 
+		// bit already true in algoDecisionWord, just reset counter
+		m_prescaleCounterAlgoTrig.at(inBxInEvent).at(iBit) = prescaleFactorsAlgoTrig.at(iBit);
+		temp_algPrescaledOr = true;
+	      } 
+	      else {
+		
+		// change bit to false in prescaled word and final decision word
+		m_uGtAlgBlk.setAlgoDecisionInterm(iBit,false);
+		
+	      } //if Prescale counter reached zero
+	    } //if prescale factor is not 1 (ie. no prescale)
 	    else {
-
-	      // change bit to false in prescaled word and final decision word
-	      m_uGtAlgBlk.setAlgoDecisionInterm(iBit,false);
-
-	    } //if Prescale counter reached zero
-	  } //if prescale factor is not 1 (ie. no prescale)
-	  else {
 	    
-	    temp_algPrescaledOr = true;
+	      temp_algPrescaledOr = true;
+	    }
+	  } // require bit in range
+	  else{
+	    edm::LogWarning("L1TGlobal")
+	      << "\nWarning: algoBit >= prescaleFactorsAlgoTrig.size() "
+	      << std::endl;
 	  }
 	} //if algo bit is set true
       } //loop over alg bits
@@ -885,7 +939,14 @@ void l1t::GlobalBoard::runFDL(edm::Event& iEvent,
 	bool bitValue = m_uGtAlgBlk.getAlgoDecisionInterm( iBit );
 
 	if( bitValue ){
-	  bool isMasked = ( triggerMaskAlgoTrig.at(iBit) == 0 );
+	  //bool isMasked = ( triggerMaskAlgoTrig.at(iBit) == 0 );
+	  bool isMasked = false;
+	  if( iBit < triggerMaskAlgoTrig.size() ) isMasked = ( triggerMaskAlgoTrig.at(iBit) == 0 );
+	  else{
+	    edm::LogWarning("L1TGlobal")
+	      << "\nWarning: algoBit >= triggerMaskAlgoTrig.size() "
+	      << std::endl;
+	  }
 
 	  bool passMask = ( bitValue && !isMasked );
 
@@ -898,17 +959,17 @@ void l1t::GlobalBoard::runFDL(edm::Event& iEvent,
 	}
       }
 
-      m_algFinalOrPreVeto = temp_algFinalOr;
+      m_algIntermOr = temp_algFinalOr;
 	
     } 
     else {
 
-      m_algFinalOrPreVeto = m_algPrescaledOr;
+      m_algIntermOr = m_algPrescaledOr;
      
     } ///if we are masking.
 
 // Set FinalOR for this board
-   m_algFinalOr = (m_algFinalOrPreVeto & !m_algFinalOrVeto);
+   m_algFinalOr = (m_algIntermOr & !m_algFinalOrVeto);
 
 
 
@@ -916,7 +977,7 @@ void l1t::GlobalBoard::runFDL(edm::Event& iEvent,
 
 // Fill DAQ Record
 void l1t::GlobalBoard::fillAlgRecord(int iBxInEvent, 
-				    std::auto_ptr<GlobalAlgBlkBxCollection>& uGtAlgRecord,
+				    std::unique_ptr<GlobalAlgBlkBxCollection>& uGtAlgRecord,
                                     int prescaleSet,
 				    int menuUUID,
 				    int firmwareUUID
@@ -937,7 +998,7 @@ void l1t::GlobalBoard::fillAlgRecord(int iBxInEvent,
     m_uGtAlgBlk.setL1FirmwareUUID(firmwareUUID);
         
     m_uGtAlgBlk.setFinalORVeto(m_algFinalOrVeto);
-    m_uGtAlgBlk.setFinalORPreVeto(m_algFinalOrPreVeto); 
+    m_uGtAlgBlk.setFinalORPreVeto(m_algIntermOr); 
     m_uGtAlgBlk.setFinalOR(m_algFinalOr);
     
 
